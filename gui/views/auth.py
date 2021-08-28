@@ -16,8 +16,7 @@ def authent(request):
     """
     error = None
     #url_next = request.GET.get('next', reverse('/'))
-    logger.info("in auth")
-
+ 
     def render_form(**kwargs):
         return render(request, 'logon.html', {
             #'url_next': url_next,

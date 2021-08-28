@@ -31,7 +31,6 @@ def get_urls(path):
     urls = []
     for file in glob.glob(path):
         urls.append(file)
-    logger.info("urls {}".format(urls))
     return urls
 
 
@@ -49,3 +48,7 @@ for app, urls in urls_files.items():
     for url in urls:
         url = url.replace(settings.BASE_DIR + "/", '').replace('/', '.').replace('.py', '')
         urlpatterns.append(re_path(r"^", include(url)))
+
+urlpatterns += i18n_patterns(
+    path("jsi18n/", JavaScriptCatalog.as_view(), name="javascript-catalog"),
+)
