@@ -1,0 +1,116 @@
+{% extends 'layout2.html' %}
+{% load i18n static %}
+
+{% block css_include %}
+{% endblock %}
+
+{% block js_include %}
+
+{% endblock %}
+
+
+{% block content %}
+
+  <div class="row">
+    <div class="col-md-12" id="dashboard_general">
+      {% for node in nodes %}
+        <div class="col-md-4 panel mar-rgt">
+          <div class="panel-heading">
+              <h1 class="panel-title">
+                <a target="_blank" >{{ node.name|upper }}</a>
+                <small>({% trans "Last check: " %} ${ monitor_date('{{ node.name }}')} )</small>
+              </h1>
+            </div>
+            <div class="panel-body col-md-12">
+              <div class="row col-md-12">
+                <div class="col-md-12">
+                  <table class="table table-condensed table-monitoring">
+                    <thead>
+                      <tr>
+                        <th>{% trans "Service" %}</th>
+                        <th>{% trans "State" %}</th>
+                      </tr>
+                    </thead>
+                    <tbody v-html="services('{{ node.name }}')"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}
+
+{% block jquery_code %}
+
+  var mandatory_services = ["VULTURED", "RSYSLOGD", "PF"];
+
+  $(function(){
+    $('.box-body, .box-header').css('backgroundColor', '#263135');
+    $('.box-body, .box-header').css('color', '#fff');
+
+    var dashboard_general_vue = new Vue({
+      el: "#dashboard_general",
+      delimiters: ["${", "}"],
+      data: {
+        monitor: {}
+      },
+
+      mounted: function(){
+        var self = this;
+
+        self.fetch_data();
+        setInterval(function(){
+          self.fetch_data();
+        }, 10000)
+      },
+
+      methods: {
+        services(node){
+          var self = this;
+          if (self.monitor[node]){
+
+            var html = "";
+
+            for (var service of self.monitor[node].services){
+              var down_color = "text-gray";
+              if( $.inArray(service.name.toUpperCase(), mandatory_services) != -1 ) {
+                down_color = "text-red";
+              }
+
+              var classes = {
+                'UP': 'text-green',
+                'UNKNOWN': 'text-orange',
+                'DOWN': down_color
+              }
+
+              html += `<tr><td>${service.friendly_name}</td><td><i class="${classes[service.status]} fas fa-circle"></i></td></tr>`;
+            }
+
+            return html;
+          }
+        },
+
+        monitor_date: function(node_name){
+          var self = this;
+          if (self.monitor[node_name]){
+            return self.monitor[node_name].date_human;
+          }
+
+          return "";
+        },
+
+
+        fetch_data(){
+          var self = this;
+          $.getJSON('{% url "gui.dashboard.services" %}', null, function(response){
+            if (check_json_error(response))
+              self.monitor = response.monitor;
+          })
+        }
+      }
+    })
+  })
+
+{% endblock %}
