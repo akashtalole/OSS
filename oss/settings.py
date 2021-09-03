@@ -11,9 +11,13 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+#BASE_DIR = Path(__file__).resolve().parent.parent
+# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+#BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 
 # Quick-start development settings - unsuitable for production
@@ -21,6 +25,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-u839qre7a%-*yfv5ixy7vpo8a2y!mgu3&eg3-f#smv)dua_xaq'
+
+LOG_LEVEL = "INFO"
+DEV_MODE = False
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -39,6 +46,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 
+AVAILABLE_APPS = [
+	'gui',
+]
+
+#INSTALLED_APPS.extend(AVAILABLE_APPS)
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -54,7 +67,10 @@ ROOT_URLCONF = 'oss.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            BASE_DIR + "/templates/",
+            BASE_DIR + "/gui/templates/gui/",
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -84,6 +100,14 @@ DATABASES = {
     }
 }
 
+LOGIN_URL = "/login/"
+
+SESSION_IDLE_TIMEOUT = 180
+SESSION_COOKIE_AGE = 3600
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_NAME = "osssessid"
+SESSION_SAVE_EVERY_REQUEST = True
+
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
@@ -108,7 +132,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 
@@ -120,8 +144,80 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
+MEDIA_PATH = '/gui/static/img/'
+#STATIC_ROOT = os.path.join(BASE_DIR, "gui/static")
 STATIC_URL = '/static/'
 
+STATICFILES_DIRS = [
+    "/code/gui/static",
+]
+
+LOG_SETTINGS = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(asctime)s %(module)s:%(lineno)d [%(levelname)s] %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+        'debug': {
+            'level': LOG_LEVEL,
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': '/var/log/oss/debug.log',
+            'formatter': 'verbose',
+            'mode': 'a',
+            'maxBytes': 10485760,
+            'backupCount': 5,
+        },
+        'api': {
+            'level': LOG_LEVEL,
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': '/var/log/oss/api.log',
+            'formatter': 'verbose',
+            'mode': 'a',
+            'maxBytes': 10485760,
+            'backupCount': 5,
+        },
+        'gui': {
+            'level': LOG_LEVEL,
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': '/var/log/oss/gui.log',
+            'formatter': 'verbose',
+            'mode': 'a',
+            'maxBytes': 10485760,
+            'backupCount': 5,
+        },
+    },
+    'loggers': {
+        'debug': {
+            'handlers': ('debug', 'console'),
+            'level': LOG_LEVEL,
+            'propagate': True,
+        },
+        'auth': {
+            'handlers': ('debug', 'console'),
+            'level': LOG_LEVEL,
+            'propagate': True
+        },
+        'api': {
+            'handlers': ('api', 'console'),
+            'level': LOG_LEVEL,
+            'propagate': True
+        },
+        'gui': {
+            'handlers': ('gui', 'console'),
+            'level': LOG_LEVEL,
+            'propagate': True
+        },
+    },
+}
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
