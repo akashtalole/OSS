@@ -48,6 +48,7 @@ INSTALLED_APPS = [
 
 AVAILABLE_APPS = [
 	'gui',
+    'system'
 ]
 
 #INSTALLED_APPS.extend(AVAILABLE_APPS)
@@ -70,6 +71,7 @@ TEMPLATES = [
         'DIRS': [
             BASE_DIR + "/templates/",
             BASE_DIR + "/gui/templates/gui/",
+	    BASE_DIR + "/system/templates/",
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -78,6 +80,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'gui.context_processors.admin_media',
             ],
         },
     },
